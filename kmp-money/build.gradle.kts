@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.kover)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
 }
 
 kotlin {
@@ -13,6 +15,7 @@ kotlin {
         namespace = "com.amarula.kmpMoney"
         compileSdk = libs.versions.android.sdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
+        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
 
         withJava()
         withHostTestBuilder {}.configure {}
@@ -25,16 +28,23 @@ kotlin {
         }
     }
 
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.runtime)
+            implementation(libs.compose.components.resources)
         }
 
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "com.amarula.kmpMoney.resources"
+    publicResClass = true
+    generateResClass = always
 }
