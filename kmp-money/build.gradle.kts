@@ -35,6 +35,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.runtime)
             implementation(libs.compose.components.resources)
+            implementation(libs.big.num)
         }
 
         commonTest.dependencies {
