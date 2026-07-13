@@ -86,6 +86,8 @@ data class KmpMoney(private val amount: BigDecimal, val currency: Currency) : Co
     override fun toString(): String = "${currency.name} ${amount.toPlainString()}"
 
     companion object {
+        private const val GROUPING_SIZE = 3
+
         /**
          * Creates a [KmpMoney] from a decimal string and a [Currency].
          *
@@ -150,7 +152,7 @@ data class KmpMoney(private val amount: BigDecimal, val currency: Currency) : Co
         val grouped = buildString {
             val chars = integerPart.reversed()
             for ((i, c) in chars.withIndex()) {
-                if (i > 0 && i % 3 == 0) append(groupingSeparator)
+                if (i > 0 && i % GROUPING_SIZE == 0) append(groupingSeparator)
                 append(c)
             }
         }.reversed()
