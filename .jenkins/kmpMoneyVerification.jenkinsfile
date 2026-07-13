@@ -74,6 +74,10 @@ node('android-build') {
     final def options = ['dockerImage': dockerImage, branch: 'main', 'history': true,
         intermediateDocker: true, proxyCache: true, gerritRemoteUrl: 'https://gerrithub.io']
 
+    final String reportsPath = '**/'
+    final String detektReportPath = "${reportsPath}detekt/"
+    final String detektReportName = 'detekt.html'
+
     try {
         catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
             ver.build(repoUrl, [
@@ -82,6 +86,25 @@ node('android-build') {
                         export isCIServer=true;
                         ./gradlew clean build -x check --stacktrace
                     '''
+                },
+                'Detekt': {
+                    try {
+                        String script = './gradlew detekt'
+                        Integer lintRetCode = sh returnStatus: true, script: script
+                        if (lintRetCode != 0) {
+                            error('Build failed on Detekt task')
+                        }
+                    } finally {
+                        /* Look for lint results report and upload if exists */
+                        Integer ret = sh(
+                            script: "find . -name ${detektReportName} | grep .",
+                            returnStatus: true
+                        )
+                        if (ret == 0) {
+                            archiveArtifacts "${detektReportPath}${detektReportName}"
+                            recordIssues(sourceCodeRetention: 'LAST_BUILD', tools: [detekt(pattern: "${detektReportPath}detekt.xml")])
+                        }
+                    }
                 },
                 'Test': {
                     try {
